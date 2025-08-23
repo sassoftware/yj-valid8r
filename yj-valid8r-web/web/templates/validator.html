@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GO JSON YAML VALIDATOR</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body,
+    html {
+      height: 100%;
+      width: 100%;
+      font-family: Arial, sans-serif;
+      overflow-y: hidden;
+      background-color: #1e1e1e;
+      color: #fff;
+    }
+
+    #container {
+      display: flex;
+      height: calc(100vh - 60px);
+    }
+
+    #left,
+    #right {
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #left {
+      border-right: 1px solid #ccc;
+    }
+
+    #right {
+      border-left: 1px solid #ccc;
+      font-family: monospace;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    #editor,
+    #configEditor,
+    #responseBody {
+      flex: 1;
+      border-radius: 4px;
+    }
+
+    #configEditor {
+      display: none;
+    }
+
+    #responseBody {
+      overflow-y: auto;
+    }
+
+    #error {
+      color: red;
+      padding: 20px;
+      margin-bottom: 10px;
+      white-space: normal;
+      max-height: 100px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    #error:not(:empty) {
+      display: block;
+    }
+
+    .dataActionBtns {
+      display: flex;
+      gap: 0;
+    }
+
+    .dataActionBtns .tab {
+      width: 50%;
+      padding: 3px;
+      font-size: 12px;
+      background-color: inherit;
+      color: inherit;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: background-color 0.3s, border-bottom 0.3s;
+    }
+
+    .dataActionBtns .tab:hover {
+      background-color: #e0e0e0;
+      color: #000;
+    }
+
+    .dataActionBtns .tab.active {
+      border-bottom: 2px solid #0069d9;
+    }
+
+    #actionBtns {
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+    }
+
+    #actionBtns button {
+      padding: 7px;
+      font-size: 14px;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #saveBtn {
+      width: 15%;
+      background-color: #3e3e42;
+    }
+
+    #sendBtn {
+      background-color: #0069d9;
+      width: 85%;
+    }
+
+    #actionBtns button:hover {
+      background-color: #0053ba;
+    }
+
+    #topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: inherit;
+      color: inherit;
+      border-bottom: 1px solid #ccc;
+    }
+
+    #title-wrapper {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    #subtitle {
+      font-size: 10px;
+      color: #aaa;
+      /* adjust as needed */
+      margin-top: 2px;
+    }
+
+
+    #top-buttons {
+      display: flex;
+      align-items: center;
+      color: inherit;
+      background-color: inherit;
+      gap: 15px;
+    }
+
+    #top-buttons button,
+    #top-buttons a,
+    #top-buttons select {
+      padding: 6px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: inherit;
+      color: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      line-height: 1.5;
+    }
+
+    #top-buttons a {
+      padding: 8px 12px;
+    }
+
+    #top-buttons select {
+      font-size: 14px;
+      padding: 4px 10px;
+    }
+
+    #top-buttons button:hover,
+    #top-buttons a:hover {
+      background-color: #ccc;
+    }
+
+    #topbar .select-group {
+      background-color: inherit;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    #topbar .select-group label {
+      font-size: 8px;
+      margin-bottom: 2px;
+      color: inherit;
+    }
+
+    #dragbar {
+      width: 5px;
+      height: 100%;
+      cursor: col-resize;
+      user-select: none;
+      /* background-color: inherit; */
+      box-shadow: 1px 0 5px rgba(0, 0, 0, 0.2);
+    }
+
+    #responseBodyUI {
+      display: none;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+</head>
+
+<body>
+  <div id="topbar">
+    <div id="title-wrapper">
+      <div id="title">GO JSON YAML VALIDATOR</div>
+      <div id="subtitle">Validate JSON and YAML against a Schema</div>
+    </div>
+    <div id="top-buttons">
+
+      <div class="select-group">
+        <label for="savedData">Saved Data</label>
+        <select id="savedData">
+          <option value="" selected>New</option>
+        </select>
+      </div>
+
+      <div class="select-group">
+        <label for="theme">Theme</label>
+        <select id="theme">
+          <option value="vs">Light</option>
+          <option value="vs-dark" selected>Dark</option>
+          <option value="hc-black">HC Black</option>
+          <option value="hc-light">HC Light</option>
+        </select>
+      </div>
+
+      <a href="https://www.github.com/" target="_blank">Documentation</a>
+    </div>
+  </div>
+
+  <div id="container">
+    <div id="left">
+      <div class="dataActionBtns">
+        <button id="dataYAMLBtn" class="tab active">YAML</button>
+        <button id="dataJSONBtn" class="tab">JSON</button>
+        <button id="dataConfigBtn" class="tab">Config</button>
+      </div>
+      <div id="editor"></div>
+      <div id="configEditor"></div>
+      <div id="actionBtns">
+        <button id="saveBtn">Save</button>
+        <button id="sendBtn">Validate</button>
+      </div>
+    </div>
+    <div id="dragbar"></div>
+    <div id="right">
+      <div class="dataActionBtns">
+        <button id="responseDisplayTypeJSON" class="tab active">JSON</button>
+        <button id="responseDisplayTypeYAML" class="tab">YAML</button>
+        <button id="responseDisplayTypeUI" class="tab">UI</button>
+      </div>
+      <div id="error"></div>
+      <div id="responseBody"></div>
+      <div id="responseBodyUI">Response UI here...</div>
+    </div>
+  </div>
+
+  <div id="manageModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+  background-color:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;">
+    <div style="background:#000; padding:20px; border-radius:8px; width:300px;">
+      <h3>Manage Saved Data</h3>
+      <div id="manageList" style="max-height:200px; overflow:auto; margin:10px 0;"></div>
+      <button id="deleteSelected">Delete Selected</button>
+      <button id="cancelModalBtn">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    let formatSelect = 'yaml';
+    const dataYAMLBtn = document.getElementById('dataYAMLBtn');
+    const dataJSONBtn = document.getElementById('dataJSONBtn');
+    const dataConfigBtn = document.getElementById('dataConfigBtn');
+
+    function switchFormat(targetFormat) {
+      const isConfig = targetFormat === 'config';
+
+      // Handle display toggle
+      document.getElementById('editor').style.display = isConfig ? 'none' : 'block';
+      document.getElementById('configEditor').style.display = isConfig ? 'block' : 'none';
+
+      // Update tab styles
+      dataYAMLBtn.classList.toggle('active', targetFormat === 'yaml');
+      dataJSONBtn.classList.toggle('active', targetFormat === 'json');
+      dataConfigBtn.classList.toggle('active', targetFormat === 'config');
+
+      // No need to convert if switching to/from config
+      if (isConfig || targetFormat === formatSelect) return;
+
+      try {
+        const currentValue = editor.getValue();
+
+        if (targetFormat === 'json') {
+          const json = JSON.stringify(jsyaml.load(currentValue), null, 2);
+          editor.setValue(json);
+        } else if (targetFormat === 'yaml') {
+          const yaml = jsyaml.dump(JSON.parse(currentValue));
+          editor.setValue(yaml);
+        }
+
+        formatSelect = targetFormat;
+        monaco.editor.setModelLanguage(editor.getModel(), targetFormat);
+      } catch (e) {
+        alert(`Invalid ${formatSelect.toUpperCase()} format. Cannot convert to ${targetFormat.toUpperCase()}.`);
+      }
+    }
+
+    // Add event listeners
+    dataYAMLBtn.addEventListener('click', () => switchFormat('yaml'));
+    dataJSONBtn.addEventListener('click', () => switchFormat('json'));
+    dataConfigBtn.addEventListener('click', () => switchFormat('config'));
+
+    // Response Data UI
+    let responseDisplayTypeSelect = 'ui';
+
+    const responseButtons = {
+      json: document.getElementById('responseDisplayTypeJSON'),
+      yaml: document.getElementById('responseDisplayTypeYAML'),
+      ui: document.getElementById('responseDisplayTypeUI')
+    };
+
+    // Generic handler
+    function switchResponseDisplay(type) {
+      responseDisplayTypeSelect = type;
+
+      Object.entries(responseButtons).forEach(([key, button]) => {
+        button.classList.toggle('active', key === type);
+      });
+
+      updateResponseDisplay();
+    }
+
+    // Attach event listeners
+    Object.entries(responseButtons).forEach(([type, button]) => {
+      button.addEventListener('click', () => switchResponseDisplay(type));
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      switchResponseDisplay(responseDisplayTypeSelect);
+    });
+
+  </script>
+
+  <script>
+    // Cached DOM Elements
+    const dragbar = document.getElementById('dragbar');
+    const container = document.getElementById('container');
+    const left = document.getElementById('left');
+    const right = document.getElementById('right');
+    const themeSelect = document.getElementById('theme');
+    const sendBtn = document.getElementById('sendBtn');
+    const errorDiv = document.getElementById('error');
+    const responseBody = document.getElementById('responseBody');
+    const responseBodyUI = document.getElementById('responseBodyUI');
+
+    const initialConfig = `# YAML Configuration for Validation
+
+# Description:
+# - checkTrailingWhitespace: Enables detection of trailing spaces or tabs at line ends.
+# - schemas: List of JSON Schema URLs or paths used for validating the data structure.
+# - regexPatternRules: Contains custom regex rules for identifying dynamic placeholders like \${VAR}.
+# - searchPaths: Defines paths within the YAML/JSON structure to extract and inspect specific values.
+# - plugins: plugin file paths as a comma-separated or newline-separated
+
+checkTrailingWhitespace: true
+
+schemas:
+  - https://kubernetesjsonschema.dev/v1.10.3-standalone/service-v1.json
+  - examples/schema.json
+
+regexPatternRules:
+  - name: Find Regex Pattern \${ }        
+    regex: '\${(\w+)(?::-[^}]*)?}'       
+
+searchPaths:
+  - pathName: Get Target Ports          
+    pathKey: spec.ports[].targetPort
+
+plugins: |
+  examples/plugins/sampleplugin.so
+  examples/plugins/plugin2.so
+`.trim();
+
+    const initialYaml = `# Example Yaml for Validation
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app.kubernetes.io/name: \${APP_NAME}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9376
+`.trim();
+
+    let editor, responseEditor, configEditor;
+    let isDragging = false;
+
+    // Store last response JSON to reuse for switching display format
+    let lastResponseJson = null;
+
+    // DRAG FUNCTIONALITY
+    dragbar.addEventListener('mousedown', e => {
+      isDragging = true;
+      document.body.style.cursor = 'col-resize';
+      e.preventDefault();
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        document.body.style.cursor = 'default';
+      }
+    });
+
+    document.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+
+      const { left: containerLeft, width: containerWidth } = container.getBoundingClientRect();
+      let newLeftWidth = e.clientX - containerLeft;
+
+      // Constraints
+      const min = 100, max = containerWidth - 100;
+      newLeftWidth = Math.max(min, Math.min(newLeftWidth, max));
+
+      left.style.width = `${newLeftWidth}px`;
+      right.style.width = `${containerWidth - newLeftWidth - dragbar.offsetWidth}px`;
+
+      if (editor) editor.layout();
+      if (responseEditor) responseEditor.layout();
+    });
+
+    // LOAD MONACO EDITOR
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+
+    require(['vs/editor/editor.main'], function () {
+      editor = monaco.editor.create(document.getElementById('editor'), {
+        value: initialYaml,
+        language: 'yaml',
+        theme: themeSelect.value,
+        automaticLayout: true,
+      });
+
+      configEditor = monaco.editor.create(document.getElementById('configEditor'), {
+        value: initialConfig,
+        language: 'yaml',
+        theme: themeSelect.value,
+        automaticLayout: true,
+      });
+
+      responseEditor = monaco.editor.create(document.getElementById('responseBody'), {
+        value: '',
+        language: 'json',
+        theme: themeSelect.value,
+        readOnly: true,
+        minimap: { enabled: false },
+        automaticLayout: true,
+      });
+
+      themeSelect.addEventListener('change', () => {
+        const theme = themeSelect.value;
+        monaco.editor.setTheme(theme);
+        setBackgroundColors(theme);
+      });
+
+      sendBtn.addEventListener('click', handleValidation);
+    });
+
+    // VALIDATION REQUEST HANDLER
+    async function handleValidation() {
+      const format = formatSelect;
+      let rawText;
+
+      if (format === 'json') {
+        // Combine as JSON
+        const config = jsyaml.load(configEditor.getValue());
+        config.data = editor.getValue(); // raw YAML as string
+        rawText = JSON.stringify(config, null, 2);
+      } else {
+        // Combine as YAML
+        const config = configEditor.getValue();
+        const editorText = editor.getValue(); // get YAML content as string
+        const indentedEditor = editorText.split('\n').map(line => '  ' + line).join('\n');
+        rawText = `${config.trim()}\ndata: |\n${indentedEditor}`;
+      }
+
+      errorDiv.textContent = '';
+      responseBodyUI.style.display = 'none';
+      responseBody.style.display = 'block';
+      responseEditor.setValue('Loading...');
+
+      let body, headers;
+
+      try {
+        if (format === 'json') {
+          body = JSON.stringify(JSON.parse(rawText));
+          headers = { 'Content-Type': 'application/json' };
+        } else {
+          body = rawText;
+          headers = { 'Content-Type': 'application/x-yaml' };
+        }
+      } catch (e) {
+        showError('Invalid JSON: ' + e.message);
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/validate', {
+          method: 'POST',
+          headers,
+          body
+        });
+
+        const contentType = res.headers.get('Content-Type');
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`HTTP ${res.status}: ${text}`);
+        }
+
+        if (contentType?.includes("application/json")) {
+          const json = await res.json();
+          lastResponseJson = json; // cache response JSON
+          updateResponseDisplay();
+        } else {
+          const text = await res.text();
+          lastResponseJson = null;
+          monaco.editor.setModelLanguage(responseEditor.getModel(), 'plaintext');
+          responseEditor.setValue(text);
+        }
+      } catch (err) {
+        showError('Request failed: ' + err.message);
+      }
+    }
+
+    // Update the response panel display based on selected display type and cached JSON
+    function updateResponseDisplay() {
+      if (typeof responseEditor === 'undefined' || responseEditor === null) {
+        return;
+      }
+
+      if (!lastResponseJson) {
+        // No JSON cached, do nothing or clear
+        responseEditor.setValue('');
+        return;
+      }
+
+      const displayType = responseDisplayTypeSelect;
+
+      // Show editor and hide UI by default (for json and yaml)
+      if (displayType === 'json' || displayType === 'yaml') {
+        responseBody.style.display = 'block';
+        responseBodyUI.style.display = 'none';
+      } else if (displayType === 'ui') {
+        responseBody.style.display = 'none';
+        responseBodyUI.style.display = 'block';
+      }
+
+      if (displayType === 'json') {
+        monaco.editor.setModelLanguage(responseEditor.getModel(), 'json');
+        responseEditor.setValue(JSON.stringify(lastResponseJson, null, 2));
+      } else if (displayType === 'yaml') {
+        monaco.editor.setModelLanguage(responseEditor.getModel(), 'yaml');
+        try {
+          const yamlText = jsyaml.dump(lastResponseJson, { indent: 2 });
+          responseEditor.setValue(yamlText);
+        } catch (e) {
+          responseEditor.setValue('Failed to convert JSON to YAML: ' + e.message);
+        }
+      } else if (displayType === 'ui') {
+        renderResponseBodyUI(lastResponseJson)
+      }
+    }
+
+    function showError(msg) {
+      errorDiv.textContent = msg;
+      responseBody.style.display = 'none';
+      if (responseEditor) responseEditor.setValue('');
+      lastResponseJson = null;
+    }
+
+    // Adjust background colors for editors & container based on theme
+    function setBackgroundColors(theme) {
+      let bgColor = '#1e1e1e'; // default dark
+      let fontColor = '#ffffff'; // default white text
+
+      // Default card colors for dark
+      let cardStyles = {
+        infoBg: '#102a43',
+        infoColor: '#cce4f6',
+        infoBorder: '#4dabf7',
+
+        errorBg: '#3d1f1f',
+        errorColor: '#ff9999',
+        errorBorder: '#e57373',
+
+        warningBg: '#3e2e05',
+        warningColor: '#ffe082',
+        warningBorder: '#ffca28',
+
+        messageBg: '#212121',
+        messageColor: '#eeeeee',
+        messageBorder: '#9e9e9e',
+
+        dataBg: '#1e4620',
+        dataColor: '#c8e6c9',
+        dataBorder: '#66bb6a'
+      };
+
+      if (theme === 'vs' || theme === 'hc-light') {
+        bgColor = theme === 'hc-light' ? '#f5f5f5' : '#ffffff';
+        fontColor = '#000000';
+        cardStyles = {
+          infoBg: '#e7f3fe',
+          infoColor: '#084298',
+          infoBorder: '#2196f3',
+
+          errorBg: '#fdecea',
+          errorColor: '#b71c1c',
+          errorBorder: '#f44336',
+
+          warningBg: '#fff8e1',
+          warningColor: '#795548',
+          warningBorder: '#ffb300',
+
+          messageBg: '#f4f6f8',
+          messageColor: '#37474f',
+          messageBorder: '#b0bec5',
+
+          dataBg: '#d4edda',
+          dataColor: '#333',
+          dataBorder: '#2fc653'
+        };
+      } else if (theme === 'hc-black') {
+        bgColor = '#000000';
+        fontColor = '#ffffff';
+        // Optional: adjust cardStyles for hc-black if needed
+      }
+
+      document.body.style.backgroundColor = bgColor;
+      document.body.style.color = fontColor;
+
+      // Set CSS variables
+      const root = document.documentElement;
+      for (const [key, value] of Object.entries(cardStyles)) {
+        root.style.setProperty(`--${key}`, value);
+      }
+    }
+
+    window.onload = () => {
+      setBackgroundColors('vs-dark'); // or use null/default as needed
+    };
+  </script>
+
+  <!-- Saved Data Logic -->
+  <script>
+    let previousSelectedId = "";
+    const saveBtn = document.getElementById('saveBtn');
+    const savedDataSelect = document.getElementById('savedData');
+    const savedEditorDataKey = 'gojsonyamlvalidatorEditorData';
+
+    // Helper to generate unique ID (using timestamp + random number for safety)
+    function generateId() {
+      return Date.now().toString() + Math.floor(Math.random() * 1000).toString();
+    }
+
+    // Only initialize if not already present
+    function initializeExampleData() {
+      const existing = localStorage.getItem(savedEditorDataKey);
+      if (!existing) {
+        const exampleData = [
+          {
+            id: "internal-example-1-no-update",
+            name: "Eg. Swagger (JSON)",
+            config: `# Enable checking for trailing whitespace at the end of lines.
+# If any line ends with unnecessary spaces or tabs, it will be flagged.
+checkTrailingWhitespace: true
+
+# List of JSON Schema URLs to validate the input data against.
+# This example uses a schema for Swagger API declaration.
+schemas:
+  - https://raw.githubusercontent.com/huzaibsayyed/sample-json-schemas/refs/heads/master/swagger/apiDeclaration.json
+
+# Define custom regex rules to match specific patterns in the data.
+regexPatternRules:
+  - name: Find Regex Pattern        # A descriptive name for the rule.
+    regex: '{([^}]+)}'              # Matches any text inside curly braces, e.g., {id}, {name}
+
+# Define specific paths in the data structure to search or extract values from.
+searchPaths:
+  - pathName: Find URLs             # Human-readable label for the search path.
+    pathKey: url                    # The field key to extract values from, e.g., all "url" fields.
+`,
+            data: `
+{
+  "apiVersion": "1.0.0",
+  "swaggerVersion": "1.2",
+  "basePath": "http://api.example.com/v1",
+  "apis": [
+    {
+      "path": "/pet",
+      "description": "Operations on pets",
+      "operations": [
+        {
+          "method": "POST",
+          "summary": "Add a new pet to the store",
+          "nickname": "addPet",
+          "type": "void",
+          "parameters": [
+            {
+              "name": "body",
+              "description": "Pet object to add",
+              "required": true,
+              "type": "Pet",
+              "paramType": "body"
+            }
+          ],
+          "responseMessages": [
+            {
+              "code": 405,
+              "message": "Invalid input"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "summary": "Get all pets",
+          "nickname": "getPets",
+          "type": "array",
+          "items": {
+            "$ref": "Pet"
+          },
+          "parameters": [],
+          "responseMessages": [
+            {
+              "code": 200,
+              "message": "OK"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/pet/{petId}",
+      "description": "Operations on a single pet",
+      "operations": [
+        {
+          "method": "GET",
+          "summary": "Find pet by ID",
+          "nickname": "getPetById",
+          "type": "Pet",
+          "parameters": [
+            {
+              "name": "petId",
+              "description": "ID of pet that needs to be fetched",
+              "required": true,
+              "type": "integer",
+              "format": "int64",
+              "paramType": "path"
+            }
+          ],
+          "responseMessages": [
+            {
+              "code": 200,
+              "message": "Pet found"
+            },
+            {
+              "code": 404,
+              "message": "Pet not found"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "models": {
+    "Pet": {
+      "id": "Pet",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["available", "pending", "sold"]
+        }
+      }
+    }
+  },
+  "authorizations": {
+    "api_key": {
+      "type": "apiKey",
+      "passAs": "header",
+      "keyname": "api_key"
+    },
+    "oauth2": {
+      "type": "oauth2",
+      "scopes": [
+        {
+          "scope": "read:pets",
+          "description": "Read your pets"
+        },
+        {
+          "scope": "write:pets",
+          "description": "Modify pets in your account"
+        }
+      ],
+      "grantTypes": {
+        "implicit": {
+          "loginEndpoint": {
+            "url": "http://api.example.com/oauth/dialog"
+          },
+          "tokenName": "access_token"
+        },
+        "authorization_code": {
+          "tokenRequestEndpoint": {
+            "url": "http://api.example.com/oauth/requestToken",
+            "clientIdName": "client_id",
+            "clientSecretName": "client_secret"
+          },
+          "tokenEndpoint": {
+            "url": "http://api.example.com/oauth/token",
+            "tokenName": "access_code"
+          }
+        }
+      }
+    }
+  }
+}
+`
+          },
+          {
+            id: "internal-example-2-no-update",
+            name: "Eg. Kubernetes",
+            config: `# Enable check for trailing whitespaces in the YAML file.
+checkTrailingWhitespace: true
+
+# JSON Schemas to validate the Kubernetes resources against.
+# In this case, it's a schema for Kubernetes Deployment (apps/v1) for version 1.14.0.
+schemas:
+  - https://kubernetesjsonschema.dev/v1.14.0/deployment-apps-v1.json
+
+# Regex-based pattern rules for validating values inside the YAML file.
+regexPatternRules:
+  - name: Find Regex Pattern  # A human-readable name for the rule.
+    regex: '\$\{(\w+)(?::-[^}]*)?\}'  # Matches variables like \${VAR} or \${VAR:-default}
+    checkEnv:
+      enabled: true    # Enables checking if the matched environment variable exists.
+      strict: true     # If true, the variable must be defined in the current environment.
+
+# Paths to extract or validate specific fields in the YAML structure.
+searchPaths:
+  - pathName: Get Target Ports      # A name to identify this search path.
+    pathKey: containers[].image     # JSONPath-like expression to get container image values.
+            `,
+            data: `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-deployment
+  labels:
+    app: my-app
+    tier: backend
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+      tier: backend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: my-app
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+    spec:
+      containers:
+        - name: my-app-container
+          image: myregistry/my-app:1.2.3
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ENVIRONMENT
+              value: "\${ENVIRONMENT}"
+            - name: CONFIG_VALUE
+              valueFrom:
+                configMapKeyRef:
+                  name: my-app-config
+                  key: config_value
+            - name: SECRET_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: my-app-secret
+                  key: token
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/myapp/config
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          imagePullPolicy: IfNotPresent
+      volumes:
+        - name: config-volume
+          configMap:
+            name: my-app-config
+`
+          }
+        ];
+
+        localStorage.setItem(savedEditorDataKey, JSON.stringify(exampleData));
+      }
+    }
+
+    // Load saved data from localStorage on page load and populate dropdown
+    function loadSavedData(selectedId = "") {
+      savedDataSelect.innerHTML = ''; // Clear existing
+
+      updateSaveButtonVisibility(selectedId);
+
+      const defaultOption = document.createElement('option');
+      defaultOption.value = "";
+      defaultOption.textContent = "⚙️ New Data";
+      if (selectedId === "") defaultOption.selected = true;
+      savedDataSelect.appendChild(defaultOption);
+
+      const savedItems = JSON.parse(localStorage.getItem(savedEditorDataKey) || '[]');
+      savedItems.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.id;
+        option.textContent = item.name;
+        if (item.id === selectedId) option.selected = true;
+        savedDataSelect.appendChild(option);
+      });
+
+      const manageOption = document.createElement('option');
+      manageOption.value = "__manage__";
+      manageOption.textContent = "⚙️ Manage Data";
+      savedDataSelect.appendChild(manageOption);
+    }
+
+    // Save current editor content with a name, update if item selected
+    saveBtn.addEventListener('click', () => {
+      const data = editor.getValue();
+      const config = configEditor.getValue();
+      let savedItems = JSON.parse(localStorage.getItem(savedEditorDataKey) || '[]');
+      const selectedId = savedDataSelect.value;
+      let savedIdToSelect = "";
+
+      if (selectedId) {
+        // 🔁 Update existing item (no need to ask for name again)
+        const index = savedItems.findIndex(item => item.id === selectedId);
+        if (index !== -1) {
+          savedItems[index].config = config;
+          savedItems[index].data = data;
+          savedIdToSelect = selectedId;
+          alert(`Data updated for "${savedItems[index].name}"`);
+        } else {
+          alert("Selected item not found. Please try again.");
+          return;
+        }
+      } else {
+        // ➕ New save, prompt for name
+        let name = prompt('Enter a name for this saved data:', 'Untitled');
+        if (!name) {
+          alert('Name is required to save.');
+          return;
+        }
+        name = name.trim();
+        if (name === '') {
+          alert('Name cannot be empty.');
+          return;
+        }
+
+        const newId = generateId();
+        savedItems.push({
+          id: newId,
+          name: name.trim(),
+          config,
+          data
+        });
+        savedIdToSelect = newId;
+        alert(`Data saved as "${name}"`);
+      }
+
+      localStorage.setItem(savedEditorDataKey, JSON.stringify(savedItems));
+      loadSavedData(savedIdToSelect); // ⏬ Re-render and select newly saved/updated item
+    });
+
+    document.getElementById('cancelModalBtn').addEventListener('click', () => {
+      document.getElementById('manageModal').style.display = 'none';
+      savedDataSelect.value = previousSelectedId;
+      // loadSavedData(previousSelectedId);  // restore selection
+    });
+
+    function updateSaveButtonVisibility(selectedId) {
+      if (selectedId.includes("no-update")) {
+        saveBtn.style.display = "none";     // Hide the save button
+        sendBtn.style.width = "100%";       // Expand send button
+      } else {
+        saveBtn.style.display = "";         // Show the save button
+        sendBtn.style.width = "85%";        // Shrink send button
+        if (selectedId === "") {
+          saveBtn.innerText = "Save";
+        } else {
+          saveBtn.innerText = "Update";
+        }
+      }
+    }
+
+    // When user selects saved data, load it into the editor
+    savedDataSelect.addEventListener('change', () => {
+      document.getElementById('configEditor').style.display = 'none';
+      document.getElementById('editor').style.display = 'block';
+      dataConfigBtn.classList.remove('active');
+
+      const selectedId = savedDataSelect.value;
+
+      // Hide Save Btn when example are shown
+      updateSaveButtonVisibility(selectedId);
+
+      // Only store if it's not the manage option
+      if (selectedId !== "__manage__") {
+        previousSelectedId = selectedId;
+      }
+
+      if (selectedId === "__manage__") {
+        showManageModal();
+        return;
+      }
+
+      if (selectedId === "") {
+        editor.setValue(initialYaml);
+        configEditor.setValue(initialConfig);
+        saveBtn.innerText = "Save";
+        formatSelect = 'yaml';
+        dataYAMLBtn.classList.add('active');
+        dataJSONBtn.classList.remove('active');
+        monaco.editor.setModelLanguage(editor.getModel(), "yaml");
+        return;
+      }
+
+      saveBtn.innerText = "Update";
+      const savedItems = JSON.parse(localStorage.getItem(savedEditorDataKey) || '[]');
+      const item = savedItems.find(i => i.id === selectedId);
+      if (item) {
+        editor.setValue(item.data);
+        configEditor.setValue(item.config);
+        if (formatSelect !== 'undefined') {
+          const val = item.data.trim();
+          document.getElementById('configEditor').style.display = 'none';
+          document.getElementById('editor').style.display = 'block';
+          dataConfigBtn.classList.remove('active');
+          if (val.startsWith('{') || val.startsWith('[')) {
+            formatSelect = 'json';
+            monaco.editor.setModelLanguage(editor.getModel(), 'json');
+            dataJSONBtn.classList.add('active');
+            dataYAMLBtn.classList.remove('active');
+          } else {
+            formatSelect = 'yaml';
+            monaco.editor.setModelLanguage(editor.getModel(), 'yaml');
+            dataYAMLBtn.classList.add('active');
+            dataJSONBtn.classList.remove('active');
+          }
+        }
+      }
+    });
+
+    function showManageModal() {
+      const modal = document.getElementById('manageModal');
+      const list = document.getElementById('manageList');
+      list.innerHTML = "";
+
+      const savedItems = JSON.parse(localStorage.getItem(savedEditorDataKey) || '[]');
+      savedItems.forEach(item => {
+        if (item.id.includes("no-update") || item.name.includes("no-update")) {
+          return; // Skip items with "no-update"
+        }
+        const div = document.createElement('div');
+        div.innerHTML = `
+      <label>
+        <input type="checkbox" value="${item.id}" />
+        ${item.name}
+      </label>
+    `;
+        list.appendChild(div);
+      });
+
+      modal.style.display = 'flex';
+    }
+
+    document.getElementById('deleteSelected').addEventListener('click', () => {
+      const checkboxes = document.querySelectorAll('#manageList input[type="checkbox"]:checked');
+      const idsToDelete = Array.from(checkboxes).map(cb => cb.value);
+      if (idsToDelete.length === 0) {
+        alert("Please select at least one item to delete.");
+        return;
+      }
+
+      let savedItems = JSON.parse(localStorage.getItem(savedEditorDataKey) || '[]');
+      savedItems = savedItems.filter(item => !idsToDelete.includes(item.id));
+      localStorage.setItem(savedEditorDataKey, JSON.stringify(savedItems));
+
+      document.getElementById('manageModal').style.display = 'none';
+      loadSavedData(); // Refresh select
+      alert("Selected items deleted.");
+    });
+
+    // Initialize saved data dropdown on load
+    initializeExampleData();
+    loadSavedData();
+  </script>
+
+  <!--  Render Response Body UI  -->
+  <script>
+    function renderResponseBodyUI(jsonData) {
+      if (!jsonData) {
+        responseBodyUI.innerHTML = '<p>No data to display</p>';
+        return;
+      }
+
+      function createListItems(arr) {
+        if (!arr || arr.length === 0) return '<li>None</li>';
+        return arr.map(item => `<li>${item}</li>`).join('');
+      }
+
+      const validation = jsonData.validationSummary || {};
+      const validationErrors = createListItems(validation.errors);
+      const validationWarnings = createListItems(validation.warnings);
+      const validationMessages = createListItems(validation.messages);
+
+      const validationSection = `<div class="info-card"><div class="card-title-section"><p><strong>Data Type:</strong> ${validation.validationDataType || 'N/A'}</p><p><strong>Validation: </strong><span class="${validation.valid === true ? 'result-box-valid-true' : 'result-box-valid-false'}">${validation.valid === true ? 'Success' : 'Failed'}</span></p></div>${validationErrors !== '<li>None</li>' ? `<div class="error-card"><p><strong>Errors:</strong></p><ul>${validationErrors}</ul></div>` : ''}${validationWarnings !== '<li>None</li>' ? `<div class="warning-card"><p><strong>Warnings:</strong></p><ul>${validationWarnings}</ul></div>` : ''}${validationMessages !== '<li>None</li>' ? `<div class="message-card"><p><strong>Messages:</strong></p><ul>${validationMessages}</ul></div>` : ''}</div>`;
+
+      const schemaSections = (jsonData.schemaResults || []).map(schemaResult => {
+        const errors = createListItems(schemaResult.errors);
+        const warnings = createListItems(schemaResult.warnings);
+        return `<div class="info-card" style="margin-bottom:8px;"><div class="card-title-section"><p><strong><span>${schemaResult.valid === true ? '✅' : '❌'}<span> Schema Path:</strong> ${schemaResult.schema || 'N/A'}</p></div>` +
+          (errors !== '<li>None</li>' ? `<div class="error-card"><p><strong>Errors:</strong></p><ul>${errors}</ul></div>` : '') +
+          (warnings !== '<li>None</li>' ? `<div class="warning-card"><p><strong>Warnings:</strong></p><ul>${warnings}</ul></div>` : '') +
+          `</div>`;
+      }).join('');
+
+      const regexPatternsSections = (jsonData.regexPatterns || []).map(pattern => {
+        const variables = createListItems(pattern.data);
+        const errors = createListItems(pattern.errors);
+        const envValues = createListItems(pattern.envValues);
+        const messages = createListItems(pattern.messages);
+
+        return `<div class="info-card" style="margin-bottom:8px;"><div class="card-title-section"><p><strong>Name:</strong> ${pattern.name || 'N/A'}</p><p><strong>CheckEnv:</strong> ${pattern.checkEnv === true ? 'True' : 'False'}</p><p><strong>CheckEnvStrictMode:</strong> ${pattern.checkEnvStrictMode === true ? 'True' : 'False'}</p></div>${variables !== '<li>None</li>' ? `<div class="data-card"><p><strong>Data:</strong></p><ul>${variables}</ul></div>` : ''}${envValues !== '<li>None</li>' ? `<div class="data-card"><p><strong>Env Values:</strong></p><ul>${envValues}</ul></div>` : ''}${errors !== '<li>None</li>' ? `<div class="error-card"><p><strong>Errors:</strong></p><ul>${errors}</ul></div>` : ''}${messages !== '<li>None</li>' ? `<div class="message-card"><p><strong>Messages:</strong></p><ul>${messages}</ul></div>` : ''}</div>`;
+      }).join('');
+
+      const pathSearchSections = (jsonData.pathSearchOutput || []).map(pathItem => {
+        const resultsValueList = (pathItem.results || []).map(res => `<li>${res.raw}</li>`).join(''); // No used 
+        const resultsList = (pathItem.results || []).map(res => `<li><strong><code>${res.fullPath}</code></strong>: <code  style="background-color:chocolate;">${res.raw}</code></li>`).join('');
+        return `<div class="info-card" style="margin-bottom:8px;"><div class="card-title-section"><p><strong>Path Name:</strong> ${pathItem.pathName || 'N/A'}</p><p><strong>Path Key:</strong> ${pathItem.pathKey || 'N/A'}</p></div><div class="data-card"><p><strong>Extracted Values (Format: FULLPATH: VALUE)</strong></p><ul>${resultsList}</ul></div></div>`;
+      }).join('');
+
+      const pluginSections = (jsonData.pluginResults || []).map(plugin => {
+        const warnings = createListItems(plugin.warnings);
+        const errors = createListItems(plugin.errors);
+        const messages = createListItems(plugin.messages);
+
+        let html = `<div class="info-card" style="margin-bottom:8px;">`;
+
+        html += `<div class="card-title-section"><p><strong>Name:</strong> ${plugin.name || 'N/A'}</p><p><strong>Execution Time:</strong> ${plugin.execution_time || 0} ms</p></div>`;
+
+        if (plugin.load_error) {
+          html += `<div class="error-card"><p><strong>Load Error:</strong></p><ul><li>${plugin.load_error}</li></ul></div>`;
+        } else if (plugin.error) {
+          html += `<div class="error-card"><p><strong>Runtime Error:</strong></p><ul><li>${plugin.error}</li></ul></div>`;
+        }
+
+        if (messages && messages !== '<li>None</li>') {
+          html += `<div class="data-card"><p><strong>Messages:</strong></p><ul>${messages}</ul></div>`;
+        }
+
+        if (warnings && warnings !== '<li>None</li>') {
+          html += `<div class="warning-card"><p><strong>Warnings:</strong></p><ul>${warnings}</ul></div>`;
+        }
+
+        if (errors && errors !== '<li>None</li>') {
+          html += `<div class="error-card"><p><strong>Errors:</strong></p><ul>${errors}</ul></div>`;
+        }
+
+        html += `</div>`;
+        return html;
+      }).join('');
+
+      responseBodyUI.innerHTML = `<div id="responseBodyUIContent"><section><h2 class="section-title">Validation Summary</h2>${validationSection || '<p>No summary results found.</p>'}</section>
+  <section><h2 class="section-title">Schema Results</h2>${schemaSections || '<p>No schema results found.</p>'}</section>
+  <section><h2 class="section-title">Regex Patterns</h2>${regexPatternsSections || '<p>No regex patterns found.</p>'}</section>
+  <section><h2 class="section-title">Path Search</h2>${pathSearchSections || '<p>No path search results found.</p>'}</section>
+  <section><h2 class="section-title">Plugin Results</h2>${pluginSections || '<p>No plugin results found.</p>'}</section>
+</div>`;
+    }
+
+  </script>
+
+  <style>
+    #responseBodyUI {
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    #responseBodyUIContent .section-title {
+      padding-bottom: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    #responseBodyUIContent {
+      margin-bottom: 0.75rem;
+    }
+
+    #responseBodyUIContent .info-card,
+    #responseBodyUIContent .error-card,
+    #responseBodyUIContent .warning-card,
+    #responseBodyUIContent .message-card,
+    #responseBodyUIContent .data-card {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      overflow-x: auto;
+    }
+
+    #responseBodyUIContent .info-card ul,
+    #responseBodyUIContent .error-card ul,
+    #responseBodyUIContent .warning-card ul,
+    #responseBodyUIContent .message-card ul,
+    #responseBodyUIContent .data-card ul {
+      margin-left: 30px;
+    }
+
+    #responseBodyUIContent .info-card p,
+    #responseBodyUIContent .error-card p,
+    #responseBodyUIContent .warning-card p,
+    #responseBodyUIContent .message-card p,
+    #responseBodyUIContent .data-card p {
+      padding-bottom: 10px;
+    }
+
+    #responseBodyUIContent .info-card {
+      background-color: var(--infoBg);
+      color: var(--infoColor);
+      border-left: 6px solid var(--infoBorder);
+    }
+
+    #responseBodyUIContent .error-card {
+      background-color: var(--errorBg);
+      color: var(--errorColor);
+      border-left: 6px solid var(--errorBorder);
+    }
+
+    #responseBodyUIContent .warning-card {
+      background-color: var(--warningBg);
+      color: var(--warningColor);
+      border-left: 6px solid var(--warningBorder);
+    }
+
+    #responseBodyUIContent .message-card {
+      background-color: var(--messageBg);
+      color: var(--messageColor);
+      border-left: 6px solid var(--messageBorder);
+    }
+
+    #responseBodyUIContent .data-card {
+      background-color: var(--dataBg);
+      color: var(--dataColor);
+      border-left: 6px solid var(--dataBorder);
+    }
+
+    .result-box-valid-true {
+      color: green;
+      font-weight: bold;
+    }
+
+    .result-box-valid-false {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</body>
+
+</html>

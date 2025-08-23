@@ -1,0 +1,28 @@
+# YAML Configuration for Validation
+
+# Description:
+# - checkTrailingWhitespace: Enables detection of trailing spaces or tabs at line ends.
+# - schemas: List of JSON Schema URLs or paths used for validating the data structure.
+# - regexPatternRules: Contains custom regex rules for identifying dynamic placeholders like ${VAR}.
+# - searchPaths: Defines paths within the YAML/JSON structure to extract and inspect specific values.
+# - plugins: plugin file paths as a comma-separated or newline-separated
+
+checkTrailingWhitespace: true
+
+schemas:
+  - https://kubernetesjsonschema.dev/v1.10.3-standalone/service-v1.json
+  - examples/schema.json
+
+data: examples/data.yaml
+
+regexPatternRules:
+  - name: Find Regex Pattern ${ }        
+    regex: '${(w+)(?::-[^}]*)?}'       
+
+searchPaths:
+  - pathName: Get Target Ports          
+    pathKey: spec.ports[].targetPort
+
+plugins: |
+  examples/plugins/sampleplugin.so
+  examples/plugins/plugin2.so
