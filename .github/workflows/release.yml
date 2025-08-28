@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggers only on tag pushes like v1.0.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build CLI and Web binaries
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o yj-valid8r-cli-linux ./yj-valid8r-cli/main.go
+          GOOS=windows GOARCH=amd64 go build -o yj-valid8r-cli-win.exe ./yj-valid8r-cli/main.go
+          GOOS=darwin GOARCH=amd64 go build -o yj-valid8r-cli-mac ./yj-valid8r-cli/main.go
+
+          GOOS=linux GOARCH=amd64 go build -o yj-valid8r-web-linux ./yj-valid8r-web/main.go
+          GOOS=windows GOARCH=amd64 go build -o yj-valid8r-web-win.exe ./yj-valid8r-web/main.go
+          GOOS=darwin GOARCH=amd64 go build -o yj-valid8r-web-mac ./yj-valid8r-web/main.go
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            yj-valid8r-cli-linux
+            yj-valid8r-cli-win.exe
+            yj-valid8r-cli-mac
+            yj-valid8r-web-linux
+            yj-valid8r-web-win.exe
+            yj-valid8r-web-mac
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
