@@ -19,9 +19,9 @@ jobs:
 
       - name: Build CLI and Web binaries
         run: |
-          GOOS=linux GOARCH=amd64 go build -o yj-valid8r-cli-linux ./yj-valid8r-cli/main.go
-          GOOS=windows GOARCH=amd64 go build -o yj-valid8r-cli-win.exe ./yj-valid8r-cli/main.go
-          GOOS=darwin GOARCH=amd64 go build -o yj-valid8r-cli-mac ./yj-valid8r-cli/main.go
+          # GOOS=linux GOARCH=amd64 go build -o yj-valid8r-cli-linux ./yj-valid8r-cli/main.go
+          # GOOS=windows GOARCH=amd64 go build -o yj-valid8r-cli-win.exe ./yj-valid8r-cli/main.go
+          # GOOS=darwin GOARCH=amd64 go build -o yj-valid8r-cli-mac ./yj-valid8r-cli/main.go
 
           GOOS=linux GOARCH=amd64 go build -o yj-valid8r-web-linux ./yj-valid8r-web/main.go
           GOOS=windows GOARCH=amd64 go build -o yj-valid8r-web-win.exe ./yj-valid8r-web/main.go
@@ -31,9 +31,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            yj-valid8r-cli-linux
-            yj-valid8r-cli-win.exe
-            yj-valid8r-cli-mac
+            # yj-valid8r-cli-linux
+            # yj-valid8r-cli-win.exe
+            # yj-valid8r-cli-mac
             yj-valid8r-web-linux
             yj-valid8r-web-win.exe
             yj-valid8r-web-mac
