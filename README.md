@@ -20,6 +20,10 @@ Designed for flexibility, it also supports a plugin system to extend validation 
 | <img src="screenshots/screenshot-web.png" width="auto" height="300"/> | <img src="screenshots/screenshot-cli.png" width="auto" height="300"/> |
 
 
+## Releases
+
+See the [Releases page](https://github.com/sassoftware/yj-valid8r/releases) for changelogs and downloadable binaries.
+
 ## Project Structure
 
 ```
