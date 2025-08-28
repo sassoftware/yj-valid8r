@@ -1251,11 +1251,11 @@ spec:
         return html;
       }).join('');
 
-      responseBodyUI.innerHTML = `<div id="responseBodyUIContent"><section><h2 class="section-title">Validation Summary</h2>${validationSection || '<p>No summary results found.</p>'}</section>
-  <section><h2 class="section-title">Schema Results</h2>${schemaSections || '<p>No schema results found.</p>'}</section>
-  <section><h2 class="section-title">Regex Patterns</h2>${regexPatternsSections || '<p>No regex patterns found.</p>'}</section>
-  <section><h2 class="section-title">Path Search</h2>${pathSearchSections || '<p>No path search results found.</p>'}</section>
-  <section><h2 class="section-title">Plugin Results</h2>${pluginSections || '<p>No plugin results found.</p>'}</section>
+      responseBodyUI.innerHTML = `<div id="responseBodyUIContent">${validationSection ? `<section><h2 class="section-title">Validation Summary</h2>${validationSection}</section>`: ''}
+  ${schemaSections ? `<section><h2 class="section-title">Schema Results</h2>${schemaSections}</section>`: ''}
+  ${regexPatternsSections ? `<section><h2 class="section-title">Regex Patterns</h2>${regexPatternsSections}</section>`: ''}
+  ${pathSearchSections ? `<section><h2 class="section-title">Path Search</h2>${pathSearchSections}</section>`: ''}
+  ${pluginSections ? `<section><h2 class="section-title">Plugin Results</h2>${pluginSections}</section>`: ''}
 </div>`;
     }
 
