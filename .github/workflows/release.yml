@@ -15,25 +15,29 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: '1.24.4'
 
-      - name: Build CLI and Web binaries
+      - name: Build CLI binaries
+        working-directory: ./yj-valid8r-cli
         run: |
-          # GOOS=linux GOARCH=amd64 go build -o yj-valid8r-cli-linux ./yj-valid8r-cli/main.go
-          # GOOS=windows GOARCH=amd64 go build -o yj-valid8r-cli-win.exe ./yj-valid8r-cli/main.go
-          # GOOS=darwin GOARCH=amd64 go build -o yj-valid8r-cli-mac ./yj-valid8r-cli/main.go
+          GOOS=linux GOARCH=amd64 go build -o ../yj-valid8r-cli-linux main.go
+          GOOS=windows GOARCH=amd64 go build -o ../yj-valid8r-cli-win.exe main.go
+          GOOS=darwin GOARCH=amd64 go build -o ../yj-valid8r-cli-mac main.go
 
-          GOOS=linux GOARCH=amd64 go build -o yj-valid8r-web-linux ./yj-valid8r-web/main.go
-          GOOS=windows GOARCH=amd64 go build -o yj-valid8r-web-win.exe ./yj-valid8r-web/main.go
-          GOOS=darwin GOARCH=amd64 go build -o yj-valid8r-web-mac ./yj-valid8r-web/main.go
+      - name: Build Web binaries
+        working-directory: ./yj-valid8r-web
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o ../yj-valid8r-web-linux main.go
+          GOOS=windows GOARCH=amd64 go build -o ../yj-valid8r-web-win.exe main.go
+          GOOS=darwin GOARCH=amd64 go build -o ../yj-valid8r-web-mac main.go
 
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            # yj-valid8r-cli-linux
-            # yj-valid8r-cli-win.exe
-            # yj-valid8r-cli-mac
+            yj-valid8r-cli-linux
+            yj-valid8r-cli-win.exe
+            yj-valid8r-cli-mac
             yj-valid8r-web-linux
             yj-valid8r-web-win.exe
             yj-valid8r-web-mac
