@@ -11,8 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v3"
 
-	internal "github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-common"
-	validator "github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-lib"
+	internal "github.com/sassoftware/yj-valid8r/yj-valid8r-common"
+	validator "github.com/sassoftware/yj-valid8r/yj-valid8r-lib"
 )
 
 //go:embed templates/*
