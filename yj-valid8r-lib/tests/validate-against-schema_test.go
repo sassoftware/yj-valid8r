@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	yjvalid8r_lib "github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-lib"
+	yjvalid8r_lib "github.com/sassoftware/yj-valid8r/yj-valid8r-lib"
 )
 
 func writeTempSchemaFile(t *testing.T, content string) string {

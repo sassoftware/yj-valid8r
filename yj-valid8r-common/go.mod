@@ -1,10 +1,10 @@
-module github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-common
+module github.com/sassoftware/yj-valid8r/yj-valid8r-common
 
 go 1.24.4
 
-replace github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-lib => ../yj-valid8r-lib // Local replace for development purposes
+replace github.com/sassoftware/yj-valid8r/yj-valid8r-lib => ../yj-valid8r-lib // Local replace for development purposes
 
-require github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-lib v0.0.0-00010101000000-000000000000
+require github.com/sassoftware/yj-valid8r/yj-valid8r-lib v0.0.0-00010101000000-000000000000
 
 require (
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect

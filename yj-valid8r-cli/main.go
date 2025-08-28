@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-cli/cli"
-	validator "github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-lib"
+	"github.com/sassoftware/yj-valid8r/yj-valid8r-cli/cli"
+	validator "github.com/sassoftware/yj-valid8r/yj-valid8r-lib"
 )
 
 func main() {

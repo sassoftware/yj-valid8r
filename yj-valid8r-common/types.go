@@ -3,7 +3,7 @@ package internal
 import (
 	"time"
 
-	validator "github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-lib"
+	validator "github.com/sassoftware/yj-valid8r/yj-valid8r-lib"
 )
 
 // ValidationRequest: input from cli and web

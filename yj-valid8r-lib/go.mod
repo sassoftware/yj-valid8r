@@ -1,4 +1,4 @@
-module github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-lib
+module github.com/sassoftware/yj-valid8r/yj-valid8r-lib
 
 go 1.24.4
 

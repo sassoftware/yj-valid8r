@@ -1,14 +1,14 @@
-module github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-cli
+module github.com/sassoftware/yj-valid8r/yj-valid8r-cli
 
 go 1.24.4
 
-replace github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-lib => ../yj-valid8r-lib // Local replace for development purposes
+replace github.com/sassoftware/yj-valid8r/yj-valid8r-lib => ../yj-valid8r-lib // Local replace for development purposes
 
-replace github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-common => ../yj-valid8r-common // Local replace for development purposes
+replace github.com/sassoftware/yj-valid8r/yj-valid8r-common => ../yj-valid8r-common // Local replace for development purposes
 
 require (
-	github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-common v0.0.0-00010101000000-000000000000
-	github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-lib v0.0.0-00010101000000-000000000000
+	github.com/sassoftware/yj-valid8r/yj-valid8r-common v0.0.0-00010101000000-000000000000
+	github.com/sassoftware/yj-valid8r/yj-valid8r-lib v0.0.0-00010101000000-000000000000
 	github.com/fatih/color v1.18.0
 	gopkg.in/yaml.v3 v3.0.1
 )

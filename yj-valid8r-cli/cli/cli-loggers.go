@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	internal "github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-common"
+	internal "github.com/sassoftware/yj-valid8r/yj-valid8r-common"
 
 	"github.com/fatih/color"
 	"gopkg.in/yaml.v3"

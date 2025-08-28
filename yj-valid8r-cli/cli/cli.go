@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
-	internal "github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-common"
+	internal "github.com/sassoftware/yj-valid8r/yj-valid8r-common"
 
-	validator "github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-lib"
+	validator "github.com/sassoftware/yj-valid8r/yj-valid8r-lib"
 
 	"gopkg.in/yaml.v3"
 )

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	validator "github.com/Huzaib-Sayyed_sasinst/yj-valid8r/yj-valid8r-lib"
+	validator "github.com/sassoftware/yj-valid8r/yj-valid8r-lib"
 )
 
 func InitValidation(
