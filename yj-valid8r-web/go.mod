@@ -2,13 +2,7 @@ module github.com/sassoftware/yj-valid8r/yj-valid8r-web
 
 go 1.24.4
 
-replace github.com/sassoftware/yj-valid8r/yj-valid8r-lib => ../yj-valid8r-lib // Local replace for development purposes
-
-replace github.com/sassoftware/yj-valid8r/yj-valid8r-common => ../yj-valid8r-common // Local replace for development purposes
-
 require (
-	github.com/sassoftware/yj-valid8r/yj-valid8r-common v0.0.0-00010101000000-000000000000
-	github.com/sassoftware/yj-valid8r/yj-valid8r-lib v0.0.0-00010101000000-000000000000
 	github.com/gin-gonic/gin v1.10.1
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -31,6 +25,8 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
+	github.com/sassoftware/yj-valid8r/yj-valid8r-common v0.0.0-20250828095646-28228b43bcc8
+	github.com/sassoftware/yj-valid8r/yj-valid8r-lib v0.0.0-20250828095646-28228b43bcc8
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
