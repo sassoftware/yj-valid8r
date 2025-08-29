@@ -7,6 +7,9 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
+// replace github.com/sassoftware/yj-valid8r/yj-valid8r-lib => ../yj-valid8r-lib // Local replace for development purposes
+// replace github.com/sassoftware/yj-valid8r/yj-valid8r-common => ../yj-valid8r-common // Local replace for development purposes
+
 require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect

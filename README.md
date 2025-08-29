@@ -9,6 +9,7 @@ Designed for flexibility, it also supports a plugin system to extend validation 
 [![Open Source Love](https://firstcontributions.github.io/open-source-badges/badges/open-source-v1/open-source.svg)]()
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 ![Made with Go](https://img.shields.io/badge/Made%20with-Go-00ADD8?logo=go&logoColor=white)
+[![Go Reference](https://img.shields.io/badge/go.dev-pkg.go.dev-blue?logo=go)](https://pkg.go.dev/search?q=yj-valid8r)
 ![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)
 ![CLI Supported](https://img.shields.io/badge/Use_as-CLI-blue)
 ![Web App Supported](https://img.shields.io/badge/Use_as-Web-orange)

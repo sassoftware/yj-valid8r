@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -166,15 +168,34 @@ func topLevelFieldMismatch(schemaProps map[string]interface{}, data map[string]i
 
 func checkURLExists(pathOrURL string) (bool, string) {
 	parsedURL, err := url.Parse(pathOrURL)
+	// If not a valid URL or it's a file URL or missing scheme, treat as local file
 	if err != nil || parsedURL.Scheme == "" || parsedURL.Scheme == "file" {
-		// Handle local path
-		normalizedPath := strings.TrimPrefix(pathOrURL, "file://")
+		var normalizedPath string
+		if parsedURL != nil && parsedURL.Scheme == "file" {
+			// For file URLs, use .Path (which is always slash-separated)
+			// On Windows, remove leading slash if present (e.g., /C:/path)
+			normalizedPath = parsedURL.Path
+			if runtime.GOOS == "windows" && strings.HasPrefix(normalizedPath, "/") && len(normalizedPath) > 2 && normalizedPath[2] == ':' {
+				normalizedPath = normalizedPath[1:]
+			}
+			// URL decoding
+			normalizedPath, _ = url.PathUnescape(normalizedPath)
+		} else {
+			// Just a path, not a file URL
+			normalizedPath = pathOrURL
+		}
+		// Convert slashes for Windows if needed
+		if runtime.GOOS == "windows" {
+			normalizedPath = filepath.FromSlash(normalizedPath)
+		}
 		_, err := os.Stat(normalizedPath)
 		if err == nil {
-			// File exists, return with file:// prefix
-			return true, "file://" + normalizedPath
+			// File exists, return with file:// prefix (properly constructed)
+			fileURL := (&url.URL{Scheme: "file", Path: filepath.ToSlash(normalizedPath)}).String()
+			return true, fileURL
 		}
-		return false, "file://" + normalizedPath
+		fileURL := (&url.URL{Scheme: "file", Path: filepath.ToSlash(normalizedPath)}).String()
+		return false, fileURL
 	}
 
 	// Handle remote URL
